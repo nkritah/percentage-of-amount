@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Percentage Calculation Game</title>
+<style>
+    body{font-family:Arial, sans-serif;text-align:center;margin-top:50px}
+    .scoreboard{margin-top:20px}
+    .question{margin-bottom:20px}
+    .result{margin-top:20px;font-size:1.2em}
+</style>
+</head>
+<body>
+<h1>Percentage Calculation Game</h1>
+
+<div class="question">
+    <p id="questionText"></p>
+    <input type="number" id="answer" placeholder="Your answer" step="any">
+    <button id="submitBtn">Submit</button>
+</div>
+
+<div class="result" id="result"></div>
+<div class="scoreboard">
+    <p>Score: <span id="score">0</span></p>
+</div>
+
+<script>
+let score = 0;
+let currentQuestion = {};   // {percent, base, answer}
+
+const scoreSpan   = document.getElementById('score');
+const questionP   = document.getElementById('questionText');
+const resultP     = document.getElementById('result');
+const answerInput = document.getElementById('answer');
+const submitBtn   = document.getElementById('submitBtn');
+
+// --- utilities ------------------------------------------------------------
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const round2    = num => Math.round(num * 100) / 100;           // 2-dp rounding
+
+function generateQuestion() {
+    const percent = randomInt(1, 100);               // 1 – 100 %
+    const base    = randomInt(10, 500);              // change range if you like
+    const answer  = round2((percent / 100) * base);  // 2 dp for neatness
+
+    currentQuestion = { percent, base, answer };
+    questionP.textContent = `What is ${percent}% of ${base}?`;
+}
+function checkAnswer() {
+    const userVal = parseFloat(answerInput.value);
+    if (isNaN(userVal)) return;                      // ignore empty/invalid
+
+    const { answer } = currentQuestion;
+    const tolerance = 0.01;                          // accept ±0.01
+
+    if (Math.abs(userVal - answer) <= tolerance) {
+        score++;
+        resultP.textContent = '✅ Correct!';
+    } else {
+        resultP.textContent = `❌ Incorrect. The correct answer is ${answer}`;
+    }
+    scoreSpan.textContent = score;
+    answerInput.value = '';
+    generateQuestion();
+    answerInput.focus();
+}
+
+// --- event wiring ---------------------------------------------------------
+submitBtn.addEventListener('click', checkAnswer);
+answerInput.addEventListener('keyup', e => {
+    if (e.key === 'Enter') checkAnswer();
+});
+
+// kickoff
+generateQuestion();
+answerInput.focus();
+</script>
+</body>
+</html>
